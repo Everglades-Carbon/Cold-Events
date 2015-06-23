@@ -1,2 +1,2 @@
 # Cold-Events
-Evaluation of the effect of gold events
+Evaluation of the effect of cold events
