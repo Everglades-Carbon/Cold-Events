@@ -2,20 +2,19 @@
 # Date:
 # Objective:
 
-library(RCurl)
 library(devtools)
-install_github("leeper/rio")
 library("rio")
 
 # Import data files.
+setwd('~/git/Cold-Events/WeatherStation_Data')
 
-evg <- import('https://github.com/Everglades-Carbon/Cold-Events/raw/master/WeatherStation_Data/FCE_Everglades_ClimDB_data.csv')
-fla <- import('https://github.com/Everglades-Carbon/Cold-Events/raw/master/WeatherStation_Data/FCE_FlamingoRS_ClimDB_data.csv')
-rp <- import('https://github.com/Everglades-Carbon/Cold-Events/raw/master/WeatherStation_Data/FCE_RoyalPalmRS_ClimDB_data.csv')
-tav <- import('https://github.com/Everglades-Carbon/Cold-Events/raw/master/WeatherStation_Data/FCE_Tavernier_ClimDB_data.csv')
+evg <- read.csv('FCE_Everglades_ClimDB_data.csv')
+fla <- read.csv('FCE_FlamingoRS_ClimDB_data.csv')
+rp <- read.csv('FCE_RoyalPalmRS_ClimDB_data.csv')
+tav <- read.csv('FCE_Tavernier_ClimDB_data.csv')
 
 cold <- rbind(evg, fla, rp, tav)
-rm(evg, fla, rp, tav,ce)
+rm(evg, fla, rp, tav)
 
 # Format the date:
 cold$delete.1 <-cold$Date/10000 
@@ -44,7 +43,11 @@ cold.events <- cold[which(cold$tmin <= 5),]
 
 cold.events$count <- 1 # adds a counter to the file
 
+cold.events$year <- year(cold.events$date)
+
 # Total number of events by station:
 event.site <- aggregate(count ~ Station, data = cold.events, FUN =sum)
 
 # counts per year by station:
+event.yr.site <- aggregate(count ~ Station + year, data = cold.events, FUN =sum)
+
