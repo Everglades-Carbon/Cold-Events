@@ -151,7 +151,6 @@ ts.model <- merge(ts, parameters.frz,
 ms.model <- merge(ms, parameters.frz, 
                   by=intersect(c('site', 'freeze', 'winter'), c('site', 'freeze', 'winter')), all=F)
 
-
 # Estimates for models
 srs.model$x <- 0; srs.model$x[srs.model[12] == 'day'] <- 1
 ts.model$x <- 0; ts.model$x[ts.model[12] == 'day'] <- 1
@@ -192,10 +191,10 @@ ms.model$est.nee[ms.model$x == 0]<- mapply(ms.model[20],
 param.2 <- parameters.frz[which(parameters.frz$freeze == 0),]
 
 names(param.2) <-c('site','freeze',	'a1.norm', 'ax.norm', 'r.norm',	'a.norm',	'b.norm',	'winter')
-
-srs.model <- merge(srs.model, param.2, by=intersection(c('site', 'winter'),c('site', 'winter')), all=F)
-ts.model <- merge(ts.model, param.2, by=intersection(c('site', 'winter'),c('site', 'winter')), all=F)
-ms.model <- merge(ms.model, param.2, by=intersection(c('site', 'winter'),c('site', 'winter')), all=F)
+param.2 <- param.2[-c(2)]
+srs.model <- merge(srs.model, param.2, by=intersect(c('site', 'winter'),c('site', 'winter')), all=F)
+ts.model <- merge(ts.model, param.2, by=intersect(c('site', 'winter'),c('site', 'winter')), all=F)
+ms.model <- merge(ms.model, param.2, by=intersect(c('site', 'winter'),c('site', 'winter')), all=F)
 
 #Estimates CO2 loss
 
@@ -223,12 +222,15 @@ ms.model$est.nee.loss[ms.model$x == 0]<- mapply(ms.model[28],
                                            ms.model[29],
                                            ms.model[7], FUN= nee.model.night)
 
-ms.model$nee.diff[ms.model$freeze == 1] <- ms.model$est.nee.loss[ms.model$freeze == 1] - ms.model$NEE[ms.model$freeze == 1]
-ts.model$nee.diff[ts.model$freeze == 1] <- ts.model$est.nee.loss[ts.model$freeze == 1] - ts.model$NEE[ts.model$freeze == 1]
-srs.model$nee.diff[srs.model$freeze == 1] <- srs.model$est.nee.loss[srs.model$freeze == 1] - srs.model$NEE[srs.model$freeze == 1]
+ms.model$nee.diff <-  ms.model$NEE - ms.model$est.nee.loss
+ts.model$nee.diff <- ts.model$NEE - ts.model$est.nee.loss
+srs.model$nee.diff <-  srs.model$NEE - srs.model$est.nee.loss
 
+# removes all values when not a freeze event:
+ms.model$nee.diff[ms.model$freeze.x == 0] <-0
+ts.model$nee.diff[ts.model$freeze.x == 0] <-0
+srs.model$nee.diff[srs.model$freeze.x == 0] <-0
 
-
-sum(na.omit(ms.model$nee.diff))*(44/1000000)*1800
-sum(srs.model$nee.diff)*(44/1000000)*1800
-sum(ts.model$nee.diff)*(44/1000000)*1800
+sum(ms.model$nee.diff)* 44/1000000 * 1800
+sum(ts.model$nee.diff)* 44/1000000 * 1800
+sum(srs.model$nee.diff)* 44/1000000 * 1800
