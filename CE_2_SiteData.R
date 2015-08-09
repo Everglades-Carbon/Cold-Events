@@ -191,13 +191,13 @@ ms.model$est.nee[ms.model$x == 0]<- mapply(ms.model[20],
 param.2 <- parameters.frz[which(parameters.frz$freeze == 0),]
 
 names(param.2) <-c('site','freeze',	'a1.norm', 'ax.norm', 'r.norm',	'a.norm',	'b.norm',	'winter')
-param.2 <- param.2[-c(2)]
+
+# merges non-frezze model parameters with th file:
 srs.model <- merge(srs.model, param.2, by=intersect(c('site', 'winter'),c('site', 'winter')), all=F)
 ts.model <- merge(ts.model, param.2, by=intersect(c('site', 'winter'),c('site', 'winter')), all=F)
 ms.model <- merge(ms.model, param.2, by=intersect(c('site', 'winter'),c('site', 'winter')), all=F)
 
 #Estimates CO2 loss
-
 srs.model$est.nee.loss[srs.model$x == 1] <- mapply(srs.model[27],
                                               srs.model[28],
                                               srs.model[29],
@@ -227,10 +227,121 @@ ts.model$nee.diff <- ts.model$NEE - ts.model$est.nee.loss
 srs.model$nee.diff <-  srs.model$NEE - srs.model$est.nee.loss
 
 # removes all values when not a freeze event:
+
 ms.model$nee.diff[ms.model$freeze.x == 0] <-0
 ts.model$nee.diff[ts.model$freeze.x == 0] <-0
 srs.model$nee.diff[srs.model$freeze.x == 0] <-0
 
-sum(ms.model$nee.diff)* 44/1000000 * 1800
-sum(ts.model$nee.diff)* 44/1000000 * 1800
-sum(srs.model$nee.diff)* 44/1000000 * 1800
+sum(na.omit(ms.model$nee.diff))* 44/1000000 * 1800
+sum(na.omit(ts.model$nee.diff))* 44/1000000 * 1800
+sum(na.omit(srs.model$nee.diff))* 44/1000000 * 1800
+
+# Site Level models:
+
+# Day models (frz)
+site.models <- data.frame()
+site.models[1:41, 1] <- seq(0, 2000, 50); names(day.models)<-c('par') 
+site.models$TA <- seq(-5, 40, 1.125)
+
+site.models$srs.frz.day <- mapply(parameters.frz[1,3],
+                             parameters.frz[1,4],
+                             parameters.frz[1,5],
+                             site.models[1], FUN= nee.model.day)
+site.models$ts.frz.day <- mapply(parameters.frz[2,3],
+                             parameters.frz[2,4],
+                             parameters.frz[2,5],
+                             site.models[1], FUN= nee.model.day)
+
+site.models$ms.frz.day <- mapply(parameters.frz[3,3],
+                             parameters.frz[3,4],
+                             parameters.frz[3,5],
+                             site.models[1], FUN= nee.model.day)
+
+# Day models (non-frz)
+site.models$srs.norm.day <- mapply(parameters.frz[4,3],
+                                  parameters.frz[4,4],
+                                  parameters.frz[4,5],
+                                  site.models[1], FUN= nee.model.day)
+site.models$ts.norm.day <- mapply(parameters.frz[5,3],
+                                 parameters.frz[5,4],
+                                 parameters.frz[5,5],
+                                 site.models[1], FUN= nee.model.day)
+
+site.models$ms.norm.day <- mapply(parameters.frz[6,3],
+                                 parameters.frz[6,4],
+                                 parameters.frz[6,5],
+                                 site.models[1], FUN= nee.model.day)
+
+# Night models (frz)
+site.models$srs.frz.night<- mapply(parameters.frz[1, 6],
+                                  parameters.frz[1,7],
+                                  site.models[2],
+                                  FUN= nee.model.night)
+site.models$ts.frz.night<- mapply(parameters.frz[2, 6],
+                                   parameters.frz[2,7],
+                                   site.models[2],
+                                   FUN= nee.model.night)
+site.models$ms.frz.night<- mapply(parameters.frz[3, 6],
+                                  parameters.frz[3,7],
+                                  site.models[2],
+                                  FUN= nee.model.night)
+
+# Night models (Non-frz)
+site.models$srs.norm.night<- mapply(parameters.frz[4, 6],
+                                   parameters.frz[4,7],
+                                   site.models[2],
+                                   FUN= nee.model.night)
+site.models$ts.norm.night<- mapply(parameters.frz[5, 6],
+                                  parameters.frz[5,7],
+                                  site.models[2],
+                                  FUN= nee.model.night)
+site.models$ms.norm.night<- mapply(parameters.frz[6, 6],
+                                  parameters.frz[6,7],
+                                  site.models[2],
+                                  FUN= nee.model.night)
+
+# Create Figure for models 
+# Plots separate for Freshwater marsh and Mangrove ecotone due to differences in range
+par(tck=0.02, mfrow=c(1,2), 
+    mai=c(1.25,1.1,0.1,0.25))
+plot(site.models$srs.frz.night , typ="l", ylim=c(0.5, 2), lwd=4,
+     ylab= "CO2 Flux (umol m-2 s-1)", xlab='Temperature(C)')
+lines(site.models$srs.norm.night , pch=2, lty=2, lwd=4)
+
+lines(site.models$ts.norm.night , typ="l", col="dimgrey", lwd=3)
+lines(site.models$ts.frz.night , typ="l", col="dimgrey",lty=2, lwd=3)
+
+legend(0, 2.0,legend=c('srs (normal)', 'srs (cold)', 'ts (normal)', 
+                'ts (cold)'), col=c('black', 'black', 'dimgrey', 'dimgrey'),
+        lwd=4, lty=c(2,1,2,1), bty="n")
+# Mangroves flux model figure component:
+plot(site.models$ms.frz.night , typ="l", col="blue", lwd=3,
+     ylab= "", xlab='Temperature(C)')
+lines(site.models$PAR,site.models$ms.norm.night , typ="l", col="blue", lty=2, lwd=3)
+
+legend(0, 25,legend=c('ms (normal)', 'ms (cold)'), col='blue',
+       lwd=4, lty=c(2,1), bty="n")
+
+# Day Figures
+par(tck=0.02, mfrow=c(1,2), 
+    mai=c(1.25,1.1,0.1,0.25))
+plot(site.models$srs.frz.day , typ="l", ylim=c(-2, 2), lwd=4,
+     ylab= "CO2 Flux (umol m-2 s-1)", xlab='PAR(u mol m-2)')
+lines(site.models$srs.norm.day , pch=2, lty=2, lwd=4)
+
+lines(site.models$ts.norm.day , typ="l", col="dimgrey", lwd=3)
+lines(site.models$ts.frz.day , typ="l", col="dimgrey",lty=2, lwd=3)
+
+legend(30, 1.8,legend=c('srs (normal)', 'srs (cold)', 'ts (normal)', 
+                       'ts (cold)'), col=c('black', 'black', 'dimgrey', 'dimgrey'),
+       lwd=4, lty=c(2,1,2,1), bty="n")
+# Mangroves flux model figure component:
+plot(site.models$ms.frz.day , typ="l", col="blue", lwd=3,
+     ylab= "", xlab='Temperature(C)')
+plot(site.models$ms.norm.day , typ="l", col="blue", lty=2, lwd=3)
+
+legend(30, 1.8,legend=c('ms (normal)', 'ms (cold)'), col='blue',
+       lwd=4, lty=c(2,1), bty="n")
+
+
+
