@@ -25,7 +25,6 @@ parameters.frz<- data.frame(
 # Creates Freeze files for each site:
 
 # Freeze models (SITE):
-
 # SRS
 SRS.frz<-subset(srs, freeze == 1)
 night.SRS.frz = nls(NEEnight ~ (a * exp(b*TA)), 
@@ -137,7 +136,6 @@ rm( SRS.frz, srs.n, TS.frz, ts.n, ms.frz, ms.n)
 #_________________________________________________________________________________________
 
 # add model parameters to files:
-
 parameters.frz$winter <- 1 # adds winter to the parameter file
 parameters.frz$freeze <- as.factor(parameters.frz$freeze) 
 srs$site <- "srs"; ts$site <- "ts"; ms$site <- "ms" # adds the site to the file
@@ -317,7 +315,7 @@ legend(0, 2.0,legend=c('srs (normal)', 'srs (cold)', 'ts (normal)',
 # Mangroves flux model figure component:
 plot(site.models$ms.frz.night , typ="l", col="blue", lwd=3,
      ylab= "", xlab='Temperature(C)')
-lines(site.models$PAR,site.models$ms.norm.night , typ="l", col="blue", lty=2, lwd=3)
+lines(site.models$TA,site.models$ms.norm.night , typ="l", col="blue", lty=2, lwd=3)
 
 legend(0, 25,legend=c('ms (normal)', 'ms (cold)'), col='blue',
        lwd=4, lty=c(2,1), bty="n")
@@ -325,23 +323,24 @@ legend(0, 25,legend=c('ms (normal)', 'ms (cold)'), col='blue',
 # Day Figures
 par(tck=0.02, mfrow=c(1,2), 
     mai=c(1.25,1.1,0.1,0.25))
-plot(site.models$srs.frz.day , typ="l", ylim=c(-2, 2), lwd=4,
-     ylab= "CO2 Flux (umol m-2 s-1)", xlab='PAR(u mol m-2)')
-lines(site.models$srs.norm.day , pch=2, lty=2, lwd=4)
+plot(site.models$V1,site.models$srs.frz.day , typ="l", ylim=c(-2, 2),
+     lwd=4, ylab= "CO2 Flux (umol m-2 s-1)", xlab='PAR(u mol m-2)')
+lines(site.models$V1,site.models$srs.norm.day , pch=2, lty=2, lwd=4)
 
-lines(site.models$ts.norm.day , typ="l", col="dimgrey", lwd=3)
-lines(site.models$ts.frz.day , typ="l", col="dimgrey",lty=2, lwd=3)
+lines(site.models$V1,site.models$ts.norm.day , typ="l", col="dimgrey", lwd=3)
+lines(site.models$V1,site.models$ts.frz.day , typ="l", col="dimgrey",lty=2, lwd=3)
 
-legend(30, 1.8,legend=c('srs (normal)', 'srs (cold)', 'ts (normal)', 
+legend(20, 1.8,legend=c('srs (normal)', 'srs (cold)', 'ts (normal)', 
                        'ts (cold)'), col=c('black', 'black', 'dimgrey', 'dimgrey'),
        lwd=4, lty=c(2,1,2,1), bty="n")
 # Mangroves flux model figure component:
-plot(site.models$ms.frz.day , typ="l", col="blue", lwd=3,
-     ylab= "", xlab='Temperature(C)')
-plot(site.models$ms.norm.day , typ="l", col="blue", lty=2, lwd=3)
 
-legend(30, 1.8,legend=c('ms (normal)', 'ms (cold)'), col='blue',
+plot(site.models$V1, site.models$ms.frz.day, typ="l", col="blue", lwd=3,
+     ylab= "", ylim=c(-8, 1), xlab='PAR(u mol m-2)')
+lines(site.models$V1,site.models$ms.norm.day, typ="l", col="blue", lty=2, lwd=3)
+
+legend(100, 1,legend=c('ms (normal)', 'ms (cold)'), col='blue',
        lwd=4, lty=c(2,1), bty="n")
 
-
-
+# the ts and ms moels are questionable!
+day.ms

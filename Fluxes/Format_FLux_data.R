@@ -7,9 +7,9 @@ rm(list=ls())
 
 #Import all srs data:
 
-setwd("/Volumes/Sparkle Malone/Projects/Freeze/R/Fluxes/SRS")
-  file_list_SRS<-list.files(pattern="*SRS.csv")
-  print(file_list_SRS)
+setwd("~/git/Cold-Events/Fluxes/SRS")
+file_list_SRS<-list.files(pattern="*SRS.csv")
+print(file_list_SRS)
 for (file_srs in file_list_SRS){
   if (!exists("srs")){
     srs <- read.csv(file_srs, header=T,, stringsAsFactors=FALSE,colClasses="numeric")
@@ -28,17 +28,17 @@ names(srs)<-c('YEAR','GAP','DTIME','DOY','HRMIN','UST','TA','WD','WS','NEE','FC'
 rm(file_list_SRS, file_srs)
 
 #Import all ts data:*will not import ts with loop?
-setwd("/Volumes/Sparkle Malone/Projects/Freeze/R/Fluxes/TS")
+setwd("~/git/Cold-Events/Fluxes/TS")
 
-ts_a <- read.csv("/Volumes/Sparkle Malone/Projects/Freeze/R/Fluxes/TS/AMF_USEsm_2008_L2_GF_V004_TS.csv", 
+ts_a <- read.csv("~/git/Cold-Events/Fluxes/TS/AMF_USEsm_2008_L2_GF_V004_TS.csv", 
                  header=T, stringsAsFactors=FALSE,colClasses="numeric")
-ts_b <- read.csv("/Volumes/Sparkle Malone/Projects/Freeze/R/Fluxes/TS/AMF_USEsm_2009_L2_GF_V004_TS.csv", 
+ts_b <- read.csv("~/git/Cold-Events/Fluxes/TS/AMF_USEsm_2009_L2_GF_V004_TS.csv", 
                  header=T, stringsAsFactors=FALSE,colClasses="numeric")
-ts_c <- read.csv("/Volumes/Sparkle Malone/Projects/Freeze/R/Fluxes/TS/AMF_USEsm_2010_L2_GF_V004_TS.csv", 
+ts_c <- read.csv("~/git/Cold-Events/Fluxes/TS/AMF_USEsm_2010_L2_GF_V004_TS.csv", 
                  header=T, stringsAsFactors=FALSE,colClasses="numeric")
-ts_d <- read.csv("/Volumes/Sparkle Malone/Projects/Freeze/R/Fluxes/TS/AMF_USEsm_2011_L2_GF_V004_TS.csv", 
+ts_d <- read.csv("~/git/Cold-Events/Fluxes/TS/AMF_USEsm_2011_L2_GF_V004_TS.csv", 
                  header=T, stringsAsFactors=FALSE,colClasses="numeric")
-ts_e <- read.csv("/Volumes/Sparkle Malone/Projects/Freeze/R/Fluxes/TS/AMF_USEsm_2012_L2_GF_V004_TS.csv", 
+ts_e <- read.csv("~/git/Cold-Events/Fluxes/TS/AMF_USEsm_2012_L2_GF_V004_TS.csv", 
                  header=T, stringsAsFactors=FALSE,colClasses="numeric")
 
 ts<-rbind(ts_a, ts_b, ts_c, ts_d, ts_e)
@@ -50,7 +50,7 @@ rm(ts_a, ts_b, ts_c, ts_d, ts_e)
 
 #Imports Mangroves(ms)data
 
-ms<-read.csv("/Volumes/Sparkle Malone/Projects/Freeze/R/Fluxes/Man/Barr_data.csv", header=T)
+ms<-read.csv("~/git/Cold-Events/Fluxes/Man/Barr_data.csv", header=T)
 
 #subset Ameriflux datasets
 srs_data<-as.data.frame(cbind(srs$YEAR,srs$DTIME, srs$DOY,srs$HRMIN,srs$TA, srs$NEE, srs$GPP, srs$PAR))
