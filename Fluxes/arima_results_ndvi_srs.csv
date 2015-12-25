@@ -1,0 +1,4 @@
+"","Parameter","Coefficents","S.E","p-value"
+"1","ar1",0.566,0.109,0
+"2","intercept",0.469,0.013,0
+"3","Cold Events",0.028,0.022,0.197

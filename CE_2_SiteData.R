@@ -57,6 +57,7 @@ parameters.frz[2,2]<- ('1')
 parameters.frz[2,3:7] <-rbind(merge(as.data.frame( t(coef(summary(day.TS.frz)) [1:3, 1])), 
                                     as.data.frame(t(coef(summary(night.TS.frz)) [1:2, 1])))) 
 
+
 # Mangrove (TS6)
 
 ms.frz<-subset(ms, freeze == 1)
@@ -69,6 +70,10 @@ day.ms.frz = nls(NEEDay ~ (a1 *ms.par.filled * ax)/(a1 * ms.par.filled + ax) + r
 
 summary(night.ms.frz)
 summary(day.ms.frz)
+
+plot(ms.frz$TA, ms.frz$NEEnight ); abline(night.ms.frz )
+plot(ms.frz$ms.par.filled , ms.frz$NEEDay)
+
 # add data to file:
 parameters.frz[3,1]<- ('ms')
 parameters.frz[3,2]<- ('1')
@@ -220,9 +225,9 @@ ms.model$est.nee.loss[ms.model$x == 0]<- mapply(ms.model[28],
                                            ms.model[29],
                                            ms.model[7], FUN= nee.model.night)
 
-ms.model$nee.diff <-  ms.model$NEE - ms.model$est.nee.loss
-ts.model$nee.diff <- ts.model$NEE - ts.model$est.nee.loss
-srs.model$nee.diff <-  srs.model$NEE - srs.model$est.nee.loss
+ms.model$nee.diff <-  ms.model$NEE - ms.model$est.nee
+ts.model$nee.diff <- ts.model$NEE - ts.model$est.nee
+srs.model$nee.diff <-  srs.model$NEE - srs.model$est.nee
 
 # removes all values when not a freeze event:
 
@@ -230,6 +235,7 @@ ms.model$nee.diff[ms.model$freeze.x == 0] <-0
 ts.model$nee.diff[ts.model$freeze.x == 0] <-0
 srs.model$nee.diff[srs.model$freeze.x == 0] <-0
 
+# Positive value = C gained and negative values = C lost 
 sum(na.omit(ms.model$nee.diff))* 44/1000000 * 1800
 sum(na.omit(ts.model$nee.diff))* 44/1000000 * 1800
 sum(na.omit(srs.model$nee.diff))* 44/1000000 * 1800
@@ -298,49 +304,117 @@ site.models$ms.norm.night<- mapply(parameters.frz[6, 6],
                                   site.models[2],
                                   FUN= nee.model.night)
 
-# Create Figure for models 
+#__________________________________________Create Figure for models __________________________________________
 # Plots separate for Freshwater marsh and Mangrove ecotone due to differences in range
-par(tck=0.02, mfrow=c(1,2), 
-    mai=c(1.25,1.1,0.1,0.25))
-plot(site.models$srs.frz.night , typ="l", ylim=c(0.5, 2), lwd=4,
-     ylab= "CO2 Flux (umol m-2 s-1)", xlab='Temperature(C)')
-lines(site.models$srs.norm.night , pch=2, lty=2, lwd=4)
-
-lines(site.models$ts.norm.night , typ="l", col="dimgrey", lwd=3)
-lines(site.models$ts.frz.night , typ="l", col="dimgrey",lty=2, lwd=3)
-
-legend(0, 2.0,legend=c('srs (normal)', 'srs (cold)', 'ts (normal)', 
-                'ts (cold)'), col=c('black', 'black', 'dimgrey', 'dimgrey'),
-        lwd=4, lty=c(2,1,2,1), bty="n")
-# Mangroves flux model figure component:
-plot(site.models$ms.frz.night , typ="l", col="blue", lwd=3,
-     ylab= "", xlab='Temperature(C)')
-lines(site.models$TA,site.models$ms.norm.night , typ="l", col="blue", lty=2, lwd=3)
-
-legend(0, 25,legend=c('ms (normal)', 'ms (cold)'), col='blue',
-       lwd=4, lty=c(2,1), bty="n")
+par(tck=0.02, mfrow=c(2,2), 
+    mai=c(1.3,1.5,0.1,0.25), cex=1.3)
 
 # Day Figures
-par(tck=0.02, mfrow=c(1,2), 
-    mai=c(1.25,1.1,0.1,0.25))
 plot(site.models$V1,site.models$srs.frz.day , typ="l", ylim=c(-2, 2),
-     lwd=4, ylab= "CO2 Flux (umol m-2 s-1)", xlab='PAR(u mol m-2)')
+     lwd=4, ylab=expression(paste("CO"[2]," Flux ("~mu, "mol m"^"-2","s"^"-1",")")), 
+     xlab=expression(paste("PAR ("~mu, "mol m"^"-2","s"^"-1",")")))
 lines(site.models$V1,site.models$srs.norm.day , pch=2, lty=2, lwd=4)
 
-lines(site.models$V1,site.models$ts.norm.day , typ="l", col="dimgrey", lwd=3)
+lines(site.models$V1,site.models$ts.norm.day , typ="l", col="dimgrey", lwd=2)
 lines(site.models$V1,site.models$ts.frz.day , typ="l", col="dimgrey",lty=2, lwd=3)
+mtext(text="a.", side=3, adj=0.08, cex=1.2, outer=F, line=-1)
 
-legend(20, 1.8,legend=c('srs (normal)', 'srs (cold)', 'ts (normal)', 
-                       'ts (cold)'), col=c('black', 'black', 'dimgrey', 'dimgrey'),
-       lwd=4, lty=c(2,1,2,1), bty="n")
+legend(20, 1.8,legend=c('SRS-2  (normal)', expression(paste('SRS-2 (T < 5'^o,'C)')), 'TS-1 (normal)', 
+                        expression(paste('TS-2 (T < 5'^o,'C)'))), 
+                        col=c('black', 'black', 'dimgrey', 'dimgrey'), lwd=4, lty=c(2,1,2,1), bty="n")
 # Mangroves flux model figure component:
-
 plot(site.models$V1, site.models$ms.frz.day, typ="l", col="blue", lwd=3,
-     ylab= "", ylim=c(-8, 1), xlab='PAR(u mol m-2)')
+     ylab="", ylim=c(-8, 1), xlab=expression(paste("PAR ("~mu, "mol m"^"-2","s"^"-1",")")))
 lines(site.models$V1,site.models$ms.norm.day, typ="l", col="blue", lty=2, lwd=3)
 
-legend(100, 1,legend=c('ms (normal)', 'ms (cold)'), col='blue',
+legend(100, 1,legend=c('SRS-6 (normal)', expression(paste('SRS-6 (T < 5'^o,'C)'))), col='blue',
        lwd=4, lty=c(2,1), bty="n")
+mtext(text="b.", side=3, adj=0.08, cex=1.2, outer=F, line=-1)
 
-# the ts and ms moels are questionable!
-day.ms
+# Night Figures
+plot(site.models$srs.frz.night , typ="l", ylim=c(0.5, 2), lwd=4,
+     ylab= expression(paste("CO"[2]," Flux ("~mu, "mol m"^"-2","s"^"-1",")")), xlab=expression(paste(" Temperature ("~degree,"C)")))
+lines(site.models$srs.norm.night , pch=2, lty=2, lwd=4)
+lines(site.models$ts.norm.night , typ="l", col="dimgrey", lwd=3)
+lines(site.models$ts.frz.night , typ="l", col="dimgrey",lty=2, lwd=3)
+mtext(text="c.", side=3, adj=0.08, cex=1.2, outer=F, line=-1)
+
+# Mangroves flux model figure component:
+plot(site.models$ms.frz.night , typ="l", col="blue", lwd=3,
+     ylab= "", xlab=expression(paste(" Temperature ("~degree,"C)")))
+lines(site.models$TA,site.models$ms.norm.night , typ="l", col="blue", lty=2, lwd=3)
+mtext(text="d.", side=3, adj=0.08, cex=1.2, outer=F, line=-1)
+
+#______________________________________________________________________________________________________________
+# NOTE: the ts and ms moels are questionable!
+# Changes in PAR on cold versus Freeze days:
+
+# Separate time:
+library(splitstackshape)
+srs<- concat.split(srs, 12, sep=" ", drop=T)
+ts<- concat.split(ts, 12, sep=" ", drop=T)
+ms<- concat.split(ms, 10, sep=" ", drop=T)
+
+# Freeze
+srs.par.frz <- srs[which(srs$freeze == 1),]; srs.par.frz <- aggregate(srs.par.frz$srs.par.filled, by=list(srs.par.frz$datetime_2), FUN= mean); plot(srs.par.frz[,2] )
+ts.par.frz <- ts[which(ts$freeze == 1),]; ts.par.frz <- aggregate(ts.par.frz$ts.par.filled, by=list(ts.par.frz$datetime_2), FUN= mean); plot(ts.par.frz[,2] )
+ms.par.frz <- ms[which(ms$freeze == 1),]; ms.par.frz <- aggregate(ms.par.frz$ms.par.filled, by=list(ms.par.frz$datetime_2), FUN= mean); plot(ms.par.frz[,2] )
+
+frz.par <- cbind(srs.par.frz,ts.par.frz[,2],ms.par.frz[,2])
+
+names(frz.par)<- c("time", "srs.frz", 'ts.frz', 'ms.frz'); rm(srs.par.frz,ts.par.frz,ms.par.frz )
+
+# Non-Frz
+
+srs.par.norm <- srs[which(srs$freeze == 0 & srs$winter == 1),]; srs.par.norm <- aggregate(srs.par.norm$srs.par.filled, by=list(srs.par.norm$datetime_2), FUN= mean); plot(srs.par.norm[,2] )
+ts.par.norm <- ts[which(ts$freeze == 0 & ts$winter == 1),]; ts.par.norm <- aggregate(ts.par.norm$ts.par.filled, by=list(ts.par.norm$datetime_2), FUN= mean); plot(ts.par.norm[,2] )
+ms.par.norm <- ms[which(ms$freeze == 0 & ms$winter == 1),]; ms.par.norm <- aggregate(ms.par.norm$ms.par.filled, by=list(ms.par.norm$datetime_2), FUN= mean); plot(ms.par.norm[,2] )
+
+norm.par <- cbind(srs.par.norm,ts.par.norm[,2],ms.par.norm[,2])
+names(norm.par)<- c("time", "srs.norm", 'ts.norm', 'ms.norm'); rm(srs.par.norm,ts.par.norm,ms.par.norm )
+
+Par.analysis <- merge(frz.par, norm.par); rm(norm.par, frz.par )
+
+# format time column:
+Par.analysis$time.test <-as.POSIXlt(Par.analysis$time, format="%H:%M:%S", "MST")
+Par.analysis$time <- format(Par.analysis$time.test, format="%H:%M")
+Par.analysis$time.test <- NULL
+
+# calculate means:
+Par.analysis$frz.par <- rowMeans(Par.analysis[, c(2:4)])
+Par.analysis$Norm.par <- rowMeans(Par.analysis[, c(5:7)])
+
+# PAR Figure
+par(mfrow=c(1,1), mai= c (1.7, 1.5, 0.25, 0.25), cex=1.2)
+
+plot(smooth(Par.analysis$Norm.par), xaxt='n', ylab=expression(paste("PAR ("~mu, "mol m"^"-2","s"^"-1",")")), 
+     type="l", col="black", lty=2, lwd= 2, ylim=c(-0.1, 1500), xlab='Hour')
+axis(1, at=seq(1, 48, 1), labels=Par.analysis$time)
+lines(smooth(Par.analysis$frz.par), lty=1, lwd=1.5)
+legend('topleft', legend= c('Average', expression(paste('T < 5'^o,'C'))), lty= c(2,1), bty="n", lwd=c(2,1))
+
+
+# Summary
+sum(Par.analysis$frz.par)-sum(Par.analysis$Norm.par)
+#________________--______---__________-----_________Calcutae SE 
+
+
+srs.par.frz<- srs[which(srs$freeze == 1),]; srs.par.frz2 <- aggregate(srs.par.frz$srs.par.filled, by=list(srs.par.frz$date), FUN= sum)
+ts.par.frz<- ts[which(ts$freeze == 1),]; ts.par.frz2 <- aggregate(ts.par.frz$ts.par.filled, by=list(ts.par.frz$date), FUN= sum)
+ms.par.frz<- ms[which(ms$freeze == 1),]; ms.par.frz2 <- aggregate(ms.par.frz$ms.par.filled, by=list(ms.par.frz$date), FUN= sum)
+
+names(srs.par.frz2)<- c('date', 'srs.par')
+names(ts.par.frz2)<- c('date', 'ts.par')
+names(ms.par.frz2)<- c('date', 'ms.par')
+
+frz.par2 <- merge(srs.par.frz2, ts.par.frz2, all=T)
+frz.par3 <- merge(frz.par2, ms.par.frz2, all=T)
+
+rm(frz.par2)
+
+frz.par3$mean <-  rowMeans(frz.par3[, 2:4], na.rm=T)
+frz.par3$par.diff <- frz.par3$mean- sum(Par.analysis$Norm.par)
+
+sum(Par.analysis$Norm.par) # average daily sum of par on normal days
+mean(frz.par3$par.diff) # Avg difference in par on freeze days from normal day mean
+sqrt(var(frz.par3$par.diff))/sqrt(length(frz.par3$par.diff)) # SE in diff between freeze day PAR and mean normal day 
